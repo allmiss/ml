@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+from datetime import datetime
+
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
@@ -5,6 +8,13 @@ from sklearn.pipeline import Pipeline
 
 from src.models import TrainMetrics
 from src.preprocessing import create_preprocessor
+
+
+@dataclass
+class TrainedModel:
+    pipeline: Pipeline
+    trained_at: datetime
+    metrics: TrainMetrics
 
 
 def create_model() -> LogisticRegression:

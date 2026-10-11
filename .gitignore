@@ -4,3 +4,4 @@ __pycache__/
 Taskfile.yml
 .task/
 .venv/
+models/

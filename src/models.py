@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -38,3 +40,9 @@ class SplitInfo(BaseModel):
 class TrainMetrics(BaseModel):
     accuracy: float
     f1: float
+
+
+class ModelStatus(BaseModel):
+    trained: bool
+    trained_at: datetime | None = None
+    metrics: TrainMetrics | None = None
