@@ -31,6 +31,20 @@ class ModelNotTrainedError(ChurnServiceError):
     status_code = 503
 
 
+class InvalidTrainingConfigError(ChurnServiceError):
+    """Конфигурация обучения не подходит.
+
+    Появляется в resolve_config, если model_type не поддерживается, в
+    create_model, если в hyperparameters есть параметр, которого нет у
+    выбранной модели, и в
+    train_churn_model, если модель отвергла значение гиперпараметра при
+    обучении (например, C=-1). Эндпоинт /model/train отвечает 400,
+    сохранённая модель при этом не меняется.
+    """
+
+    status_code = 400
+
+
 class InvalidModelFileError(ChurnServiceError):
     """Файл модели в неподдерживаемом формате.
 

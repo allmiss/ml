@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FeatureVectorChurn(BaseModel):
@@ -59,6 +60,18 @@ class SplitInfo(BaseModel):
     churn_distribution: dict[str, ClassDistribution]
 
 
+class TrainingConfigChurn(BaseModel):
+    model_config = ConfigDict(json_schema_extra={
+        "examples": [
+            {"model_type": "logreg", "hyperparameters": {"C": 1.0, "class_weight": "balanced"}},
+            {"model_type": "random_forest", "hyperparameters": {"n_estimators": 200, "max_depth": 8}},
+        ],
+    })
+
+    model_type: str = "logreg"
+    hyperparameters: dict[str, Any] = Field(default_factory=dict)
+
+
 class TrainMetrics(BaseModel):
     accuracy: float
     f1: float
@@ -66,5 +79,7 @@ class TrainMetrics(BaseModel):
 
 class ModelStatus(BaseModel):
     trained: bool
+    model_type: str | None = None
+    hyperparameters: dict[str, Any] | None = None
     trained_at: datetime | None = None
     metrics: TrainMetrics | None = None

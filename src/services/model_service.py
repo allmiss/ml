@@ -3,11 +3,11 @@ from datetime import datetime
 from pathlib import Path
 
 from src.exceptions import ModelNotTrainedError
-from src.models import FeatureVectorChurn, ModelStatus, PredictionResponseChurn, TrainMetrics
+from src.models import FeatureVectorChurn, ModelStatus, PredictionResponseChurn, TrainingConfigChurn, TrainMetrics
 from src.prediction import predict_churn
 from src.services.dataset_service import DatasetService
 from src.storage import load_churn_model, save_churn_model
-from src.training import TrainedModel, evaluate_model, train_churn_model
+from src.training import TrainedModel, evaluate_model, resolve_config, train_churn_model
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -27,11 +27,12 @@ class ModelService:
         except Exception:
             logger.exception("Не удалось загрузить модель из %s", self.model_path)
 
-    def train(self) -> TrainMetrics:
+    def train(self, config: TrainingConfigChurn) -> TrainMetrics:
         X_train, X_test, y_train, y_test = self.dataset_service.split()
-        pipeline = train_churn_model(X_train, y_train)
+        pipeline = train_churn_model(X_train, y_train, config)
         model = TrainedModel(
             pipeline=pipeline,
+            config=resolve_config(config),
             trained_at=datetime.now().astimezone(),
             metrics=evaluate_model(pipeline, X_test, y_test),
         )
@@ -42,7 +43,13 @@ class ModelService:
     def status(self) -> ModelStatus:
         if self.model is None:
             return ModelStatus(trained=False)
-        return ModelStatus(trained=True, trained_at=self.model.trained_at, metrics=self.model.metrics)
+        return ModelStatus(
+            trained=True,
+            model_type=self.model.config.model_type,
+            hyperparameters=self.model.config.hyperparameters,
+            trained_at=self.model.trained_at,
+            metrics=self.model.metrics,
+        )
 
     def predict(self, features: list[FeatureVectorChurn]) -> PredictionResponseChurn:
         if self.model is None:

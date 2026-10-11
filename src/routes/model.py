@@ -1,14 +1,21 @@
 from fastapi import APIRouter
 
 from src.dependencies import ModelServiceDep
-from src.models import ModelStatus, TrainMetrics
+from src.models import ErrorResponse, ModelStatus, TrainingConfigChurn, TrainMetrics
 
 router = APIRouter(prefix="/model", tags=["model"])
 
 
-@router.post("/train")
-def model_train(service: ModelServiceDep) -> TrainMetrics:
-    return service.train()
+@router.post(
+    "/train",
+    summary="Обучить модель",
+    responses={400: {"model": ErrorResponse, "description": "Неизвестный тип модели или неверные гиперпараметры"}},
+)
+def model_train(service: ModelServiceDep, config: TrainingConfigChurn | None = None) -> TrainMetrics:
+    """Обучает модель выбранного типа на churn_dataset.csv, сохраняет её на диск
+    и возвращает метрики на тестовой выборке. Без тела запроса обучается logreg
+    с параметрами по умолчанию."""
+    return service.train(config or TrainingConfigChurn())
 
 
 @router.get("/status")
