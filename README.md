@@ -46,5 +46,16 @@
    - разделяет признаки на числовые и категориальные
 2. Явно задать, какие столбцы считать числовыми, а какие категориальными — сделано (`NUMERIC_FEATURES`, `CATEGORICAL_FEATURES` в `src/preprocessing.py`)
 3. Реализовать разбиение на train и test с помощью `train_test_split` из scikit-learn — сделано (`split_data` в `src/preprocessing.py`)
-4. Добавить проверку распределения классов `churn` в train и test — сделано (`churn_distribution` в `src/preprocessing.py`)
+4. Добавить проверку распределения классов `churn` в train и test — сделано (`class_distribution` в `src/preprocessing.py`)
 5. Добавить эндпоинт `GET /dataset/split-info`, который возвращает размеры train и test выборок и распределение `churn` — сделано
+
+### День 5. Модель
+
+1. Выбрать простую модель, например `LogisticRegression` из scikit-learn — сделано (`create_model` в `src/training.py`)
+2. Настроить предобработку признаков — сделано (`create_preprocessor` в `src/preprocessing.py`)
+   - масштабирование числовых признаков (`StandardScaler`)
+   - кодирование категориальных через `OneHotEncoder`
+3. Объединить предобработку и модель в единый `Pipeline` — сделано (`create_pipeline` в `src/training.py`)
+4. Реализовать функцию `train_churn_model`, которая принимает тренировочный датасет и возвращает обученный pipeline — сделано (`src/training.py`)
+5. Добавить эндпоинт `POST /model/train`, который обучает модель на данных из churn_dataset.csv и возвращает accuracy и f1 на тестовой выборке — сделано
+6. Обработать ситуацию, когда датасет ещё не загружен или пуст — сделано (`ChurnDataset` в `src/dataset.py`, ответ 503 с пояснением)

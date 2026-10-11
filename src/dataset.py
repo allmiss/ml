@@ -1,15 +1,37 @@
 import csv
 from pathlib import Path
 
+import pandas as pd
+
 from src.models import DatasetRowChurn
 
-DATASET_PATH = Path(__file__).parent / "data" / "churn_dataset.csv"
+
+class DatasetUnavailableError(Exception):
+    pass
 
 
-def load_dataset(path: Path = DATASET_PATH) -> list[DatasetRowChurn]:
-    with open(path, newline="", encoding="utf-8-sig") as f:
-        return [DatasetRowChurn(**row) for row in csv.DictReader(f)]
+class ChurnDataset:
+    def __init__(self, path: Path):
+        self.path = path
+        self._rows: list[DatasetRowChurn] = []
 
+    @property
+    def rows(self) -> list[DatasetRowChurn]:
+        if not self._rows:
+            self._rows = self._load()
+        return self._rows
 
-def to_records(rows: list[DatasetRowChurn]) -> list[dict]:
-    return [row.model_dump() for row in rows]
+    def to_records(self) -> list[dict]:
+        return [row.model_dump() for row in self.rows]
+
+    def to_frame(self) -> pd.DataFrame:
+        return pd.DataFrame(self.to_records())
+
+    def _load(self) -> list[DatasetRowChurn]:
+        if not self.path.exists():
+            raise DatasetUnavailableError(f"Датасет не загружен: файл {self.path.name} не найден")
+        with open(self.path, newline="", encoding="utf-8-sig") as f:
+            rows = [DatasetRowChurn(**row) for row in csv.DictReader(f)]
+        if not rows:
+            raise DatasetUnavailableError("Датасет пуст")
+        return rows
