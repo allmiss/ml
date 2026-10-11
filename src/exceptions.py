@@ -1,0 +1,40 @@
+class ChurnServiceError(Exception):
+    """Базовое исключение сервиса.
+
+    Все ошибки сервиса наследуются от него. Обработчик из
+    src/handlers/exception_handlers.py превращает их в JSON-ответ
+    {"detail": <сообщение>} с HTTP-кодом из status_code.
+    """
+
+    status_code = 500
+
+
+class DatasetUnavailableError(ChurnServiceError):
+    """Датасет недоступен.
+
+    Появляется при первом обращении к ChurnDataset.rows, если файл
+    датасета не найден или в нём нет ни одной строки данных.
+    Эндпоинты /dataset/* и /model/train отвечают 503.
+    """
+
+    status_code = 503
+
+
+class ModelNotTrainedError(ChurnServiceError):
+    """Модель ещё не обучена.
+
+    Появляется в ModelService.predict, если в приложении нет модели: при старте
+    файл модели не найден или не загрузился, а POST /model/train
+    ещё не вызывался. Эндпоинт /predict отвечает 503.
+    """
+
+    status_code = 503
+
+
+class InvalidModelFileError(ChurnServiceError):
+    """Файл модели в неподдерживаемом формате.
+
+    Появляется в load_churn_model, если в файле лежит не TrainedModel,
+    например модель, сохранённая старой версией сервиса. При старте
+    приложения ошибка пишется в лог, а сервис запускается без модели.
+    """

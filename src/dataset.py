@@ -3,11 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.exceptions import DatasetUnavailableError
 from src.models import DatasetRowChurn
-
-
-class DatasetUnavailableError(Exception):
-    pass
 
 
 class ChurnDataset:

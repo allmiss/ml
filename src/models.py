@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class FeatureVectorChurn(BaseModel):
@@ -17,6 +17,28 @@ class FeatureVectorChurn(BaseModel):
 
 class DatasetRowChurn(FeatureVectorChurn):
     churn: int
+
+
+class ChurnPrediction(BaseModel):
+    churn: int
+    probabilities: dict[int, float]
+
+
+class PredictionResponseChurn(BaseModel):
+    model_config = ConfigDict(json_schema_extra={
+        "examples": [{
+            "predictions": [
+                {"churn": 1, "probabilities": {"0": 0.3278, "1": 0.6722}},
+                {"churn": 0, "probabilities": {"0": 0.9807, "1": 0.0193}},
+            ],
+        }],
+    })
+
+    predictions: list[ChurnPrediction]
+
+
+class ErrorResponse(BaseModel):
+    detail: str
 
 
 class DatasetInfo(BaseModel):
