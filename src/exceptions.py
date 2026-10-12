@@ -31,6 +31,18 @@ class ModelNotTrainedError(ChurnServiceError):
     status_code = 503
 
 
+class FeatureMismatchError(ChurnServiceError):
+    """Признаки для предсказания не совпадают с признаками модели.
+
+    Появляется в predict_churn, если набор или порядок признаков, которые
+    сервис собирает из FeatureVectorChurn, отличается от того, на котором
+    обучалась загруженная модель. Так бывает, если после обучения изменили
+    списки признаков. Эндпоинт /predict отвечает 503, пока модель не переобучат.
+    """
+
+    status_code = 503
+
+
 class InvalidTrainingConfigError(ChurnServiceError):
     """Конфигурация обучения не подходит.
 

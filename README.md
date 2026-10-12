@@ -108,3 +108,11 @@
 3. Реализовать выбор модели по `model_type` и создание `LogisticRegression` или `RandomForestClassifier` с указанными `hyperparameters` — сделано (`create_model` в `src/training.py`)
 4. Сохранять вместе с моделью информацию о типе и гиперпараметрах — сделано (поле `config` в `TrainedModel`)
 5. В эндпоинте `/model/status` показывать тип модели и основные гиперпараметры — сделано (поля `model_type` и `hyperparameters`)
+
+### День 9. Предобработка
+
+1. Явно разделить признаки churn на числовые и категориальные — сделано (`NUMERIC_FEATURES` и `CATEGORICAL_FEATURES` в `src/preprocessing.py`)
+2. Использовать `ColumnTransformer` и `Pipeline`, чтобы объединить `StandardScaler` для числовых и `OneHotEncoder` для категориальных признаков — сделано (`create_preprocessor` в `src/preprocessing.py`, у каждой группы свой `Pipeline`)
+3. Убедиться, что вся цепочка предобработки и модель сохраняются и загружаются как один объект — сделано (`TrainedModel` в одном файле `.joblib`)
+4. Обновить подготовку `FeatureVectorChurn` для предсказания, чтобы порядок и набор признаков точно совпадали с обучением — сделано (`FEATURES` и `features_to_frame` в `src/preprocessing.py`, проверка в `predict_churn`)
+5. Добавить эндпоинт `GET /model/schema`, который возвращает список признаков churn и ожидаемые типы значений — сделано (для категориальных признаков ещё и допустимые значения из обученной модели)

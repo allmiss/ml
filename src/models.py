@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -58,6 +58,18 @@ class SplitInfo(BaseModel):
     train_size: int
     test_size: int
     churn_distribution: dict[str, ClassDistribution]
+
+
+class FeatureInfo(BaseModel):
+    name: str
+    type: str
+    kind: Literal["numeric", "categorical"]
+    allowed_values: list[str] | None = None
+
+
+class ModelSchema(BaseModel):
+    features: list[FeatureInfo]
+    target: str
 
 
 class TrainingConfigChurn(BaseModel):

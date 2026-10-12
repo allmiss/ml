@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.dependencies import ModelServiceDep
-from src.models import ErrorResponse, ModelStatus, TrainingConfigChurn, TrainMetrics
+from src.models import ErrorResponse, ModelSchema, ModelStatus, TrainingConfigChurn, TrainMetrics
 
 router = APIRouter(prefix="/model", tags=["model"])
 
@@ -21,3 +21,12 @@ def model_train(service: ModelServiceDep, config: TrainingConfigChurn | None = N
 @router.get("/status")
 def model_status(service: ModelServiceDep) -> ModelStatus:
     return service.status()
+
+
+@router.get("/schema", summary="Схема признаков для /predict")
+def model_schema(service: ModelServiceDep) -> ModelSchema:
+    """Список признаков в том порядке, в котором их использует модель, с JSON-типами.
+    Для категориальных признаков `allowed_values` — значения, известные обученной
+    модели; пока модель не обучена, там `null`. Неизвестные значения не вызывают
+    ошибку, но модель их не учитывает."""
+    return service.schema()

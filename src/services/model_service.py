@@ -3,8 +3,17 @@ from datetime import datetime
 from pathlib import Path
 
 from src.exceptions import ModelNotTrainedError
-from src.models import FeatureVectorChurn, ModelStatus, PredictionResponseChurn, TrainingConfigChurn, TrainMetrics
+from src.models import (
+    FeatureInfo,
+    FeatureVectorChurn,
+    ModelSchema,
+    ModelStatus,
+    PredictionResponseChurn,
+    TrainingConfigChurn,
+    TrainMetrics,
+)
 from src.prediction import predict_churn
+from src.preprocessing import FEATURES, NUMERIC_FEATURES, TARGET, fitted_categories
 from src.services.dataset_service import DatasetService
 from src.storage import load_churn_model, save_churn_model
 from src.training import TrainedModel, evaluate_model, resolve_config, train_churn_model
@@ -49,6 +58,22 @@ class ModelService:
             hyperparameters=self.model.config.hyperparameters,
             trained_at=self.model.trained_at,
             metrics=self.model.metrics,
+        )
+
+    def schema(self) -> ModelSchema:
+        types = {name: prop["type"] for name, prop in FeatureVectorChurn.model_json_schema()["properties"].items()}
+        categories = fitted_categories(self.model.pipeline) if self.model is not None else {}
+        return ModelSchema(
+            features=[
+                FeatureInfo(
+                    name=name,
+                    type=types[name],
+                    kind="numeric" if name in NUMERIC_FEATURES else "categorical",
+                    allowed_values=categories.get(name),
+                )
+                for name in FEATURES
+            ],
+            target=TARGET,
         )
 
     def predict(self, features: list[FeatureVectorChurn]) -> PredictionResponseChurn:
