@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
 from src.dependencies import ModelServiceDep
-from src.models import ErrorResponse, ModelSchema, ModelStatus, TrainingConfigChurn, TrainMetrics
+from src.models import ModelSchema, ModelStatus, TrainingConfigChurn, TrainMetrics
+from src.routes.error_examples import TRAIN_ERRORS
 
 router = APIRouter(prefix="/model", tags=["model"])
 
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/model", tags=["model"])
 @router.post(
     "/train",
     summary="Обучить модель",
-    responses={400: {"model": ErrorResponse, "description": "Неизвестный тип модели или неверные гиперпараметры"}},
+    responses=TRAIN_ERRORS,
 )
 def model_train(service: ModelServiceDep, config: TrainingConfigChurn | None = None) -> TrainMetrics:
     """Обучает модель выбранного типа на churn_dataset.csv, сохраняет её на диск

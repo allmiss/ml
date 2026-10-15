@@ -2,8 +2,9 @@ import csv
 from pathlib import Path
 
 import pandas as pd
+from pydantic import ValidationError
 
-from src.exceptions import DatasetUnavailableError
+from src.exceptions import DataPreparationError, DatasetUnavailableError
 from src.models import DatasetRowChurn
 
 
@@ -26,9 +27,22 @@ class ChurnDataset:
 
     def _load(self) -> list[DatasetRowChurn]:
         if not self.path.exists():
-            raise DatasetUnavailableError(f"Датасет не загружен: файл {self.path.name} не найден")
+            raise DatasetUnavailableError(
+                f"Датасет не загружен: файл {self.path.name} не найден", details={"file": self.path.name}
+            )
         with open(self.path, newline="", encoding="utf-8-sig") as f:
-            rows = [DatasetRowChurn(**row) for row in csv.DictReader(f)]
+            reader = csv.DictReader(f)
+            try:
+                rows = [DatasetRowChurn(**row) for row in reader]
+            except ValidationError as e:
+                raise DataPreparationError(
+                    f"Неверные данные в строке {reader.line_num} файла {self.path.name}",
+                    details={
+                        "file": self.path.name,
+                        "line": reader.line_num,
+                        "errors": [{"field": ".".join(map(str, err["loc"])), "message": err["msg"]} for err in e.errors()],
+                    },
+                ) from None
         if not rows:
-            raise DatasetUnavailableError("Датасет пуст")
+            raise DatasetUnavailableError("Датасет пуст", details={"file": self.path.name})
         return rows

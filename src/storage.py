@@ -19,5 +19,6 @@ def load_churn_model(path: Path = MODEL_PATH) -> TrainedModel:
         return TrainedModel(**{field: getattr(model, field) for field in TrainedModel.model_fields})
     except (AttributeError, ValidationError):
         raise InvalidModelFileError(
-            f"Файл {path.name} в старом формате, переобучите модель через POST /model/train"
+            f"Файл {path.name} в старом формате, переобучите модель через POST /model/train",
+            details={"file": path.name},
         ) from None

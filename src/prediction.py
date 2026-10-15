@@ -1,6 +1,6 @@
 from sklearn.pipeline import Pipeline
 
-from src.exceptions import FeatureMismatchError
+from src.exceptions import FeatureMismatchError, PredictionError
 from src.models import ChurnPrediction, FeatureVectorChurn
 from src.preprocessing import features_to_frame
 
@@ -13,13 +13,19 @@ def predict_churn(pipeline: Pipeline, features: list[FeatureVectorChurn]) -> lis
     trained_features = list(pipeline.feature_names_in_)
     if list(X.columns) != trained_features:
         raise FeatureMismatchError(
-            f"Модель обучена на признаках {trained_features}, а сервис передаёт {list(X.columns)}. "
-            "Переобучите модель через POST /model/train"
+            "Признаки сервиса не совпадают с признаками модели, переобучите её через POST /model/train",
+            details={"expected": trained_features, "received": list(X.columns)},
         )
 
-    classes = pipeline.classes_
-    labels = pipeline.predict(X)
-    probabilities = pipeline.predict_proba(X)
+    try:
+        classes = pipeline.classes_
+        labels = pipeline.predict(X)
+        probabilities = pipeline.predict_proba(X)
+    except (ValueError, TypeError, AttributeError) as e:
+        raise PredictionError(
+            "Модель не смогла посчитать предсказание",
+            details={"clients": len(features), "reason": str(e)},
+        ) from None
 
     return [
         ChurnPrediction(

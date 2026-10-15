@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Body
 
 from src.dependencies import ModelServiceDep
-from src.models import ErrorResponse, FeatureVectorChurn, PredictionResponseChurn
+from src.models import FeatureVectorsChurn, PredictionResponseChurn
+from src.routes.error_examples import PREDICT_ERRORS
 
 router = APIRouter(tags=["prediction"])
 
@@ -48,24 +49,14 @@ PREDICT_EXAMPLES = {
 @router.post(
     "/predict",
     summary="Предсказать отток клиентов",
-    responses={
-        503: {
-            "model": ErrorResponse,
-            "description": "Модель ещё не обучена",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Модель не обучена, обучите её через POST /model/train"},
-                },
-            },
-        },
-    },
+    responses=PREDICT_ERRORS,
 )
 def predict(
     service: ModelServiceDep,
-    features: Annotated[FeatureVectorChurn | list[FeatureVectorChurn], Body(openapi_examples=PREDICT_EXAMPLES)],
+    features: Annotated[FeatureVectorsChurn, Body(openapi_examples=PREDICT_EXAMPLES)],
 ) -> PredictionResponseChurn:
     """Принимает одного клиента или список клиентов и возвращает для каждого
-    предсказанный класс `churn` (1 — уйдёт, 0 — останется) и вероятности обоих классов."""
-    if isinstance(features, FeatureVectorChurn):
-        features = [features]
+    предсказанный класс `churn` (1 — уйдёт, 0 — останется) и вероятности обоих классов.
+    Клиент должен содержать ровно признаки из `GET /model/schema` с подходящими типами,
+    иначе ответ 422 с ошибкой для каждого неверного поля."""
     return service.predict(features)

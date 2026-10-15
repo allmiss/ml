@@ -36,7 +36,8 @@ class TrainedModel(BaseModel):
 def resolve_config(config: TrainingConfigChurn) -> TrainingConfigChurn:
     if config.model_type not in MODEL_CLASSES:
         raise InvalidTrainingConfigError(
-            f"Неизвестный тип модели '{config.model_type}'. Доступные: {', '.join(MODEL_CLASSES)}"
+            f"Неизвестный тип модели '{config.model_type}'",
+            details={"model_type": config.model_type, "supported": list(MODEL_CLASSES)},
         )
     return TrainingConfigChurn(
         model_type=config.model_type,
@@ -49,7 +50,10 @@ def create_model(config: TrainingConfigChurn) -> ClassifierMixin:
     try:
         return MODEL_CLASSES[config.model_type](**config.hyperparameters)
     except TypeError as e:
-        raise InvalidTrainingConfigError(f"Неверные гиперпараметры для {config.model_type}: {e}") from None
+        raise InvalidTrainingConfigError(
+            f"Неверные гиперпараметры для {config.model_type}",
+            details={"model_type": config.model_type, "reason": str(e)},
+        ) from None
 
 
 def create_pipeline(config: TrainingConfigChurn) -> Pipeline:
@@ -64,7 +68,10 @@ def train_churn_model(X_train: pd.DataFrame, y_train: pd.Series, config: Trainin
     try:
         pipeline.fit(X_train, y_train)
     except ValueError as e:
-        raise InvalidTrainingConfigError(f"Не удалось обучить {config.model_type}: {e}") from None
+        raise InvalidTrainingConfigError(
+            f"Не удалось обучить {config.model_type}",
+            details={"model_type": config.model_type, "reason": str(e)},
+        ) from None
     return pipeline
 
 

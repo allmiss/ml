@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from src.config import RANDOM_STATE, TEST_SIZE
+from src.exceptions import DataPreparationError
 from src.models import ClassDistribution, FeatureVectorChurn
 
 TARGET = "churn"
@@ -32,6 +33,10 @@ def features_to_frame(features: list[FeatureVectorChurn]) -> pd.DataFrame:
 
 
 def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    missing = [column for column in FEATURES + [TARGET] if column not in df.columns]
+    if missing:
+        raise DataPreparationError("В данных нет нужных колонок", details={"missing": missing})
+
     df = df.dropna(subset=[TARGET])
 
     X = df[FEATURES].copy()
@@ -46,7 +51,13 @@ def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 def split_data(
     X: pd.DataFrame, y: pd.Series, test_size: float = TEST_SIZE, random_state: int = RANDOM_STATE
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    return train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
+    try:
+        return train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
+    except ValueError as e:
+        raise DataPreparationError(
+            "Не удалось разбить данные на обучающую и тестовую выборки",
+            details={"rows": len(X), "test_size": test_size, "reason": str(e)},
+        ) from None
 
 
 def class_distribution(y: pd.Series) -> ClassDistribution:
