@@ -106,6 +106,49 @@ class TrainingConfigChurn(BaseModel):
 class TrainMetrics(BaseModel):
     accuracy: float
     f1: float
+    # None у моделей, обученных до появления roc_auc
+    roc_auc: float | None = None
+
+
+class TrainingRecord(BaseModel):
+    """Одна запись истории обучений: какая модель, на каких данных и с каким качеством."""
+
+    id: int
+    trained_at: datetime
+    model_type: str
+    hyperparameters: dict[str, Any]
+    train_size: int
+    test_size: int
+    metrics: TrainMetrics
+
+
+class ModelMetrics(BaseModel):
+    """Метрики последнего обучения и, по запросу, несколько последних записей истории."""
+
+    latest: TrainingRecord | None
+    history: list[TrainingRecord]
+
+
+MetricName = Literal["accuracy", "f1", "roc_auc"]
+
+
+class ConfigComparison(BaseModel):
+    """Одна настройка модели (тип + гиперпараметры) и её метрики по последнему обучению с ней."""
+
+    model_type: str
+    hyperparameters: dict[str, Any]
+    metrics: TrainMetrics
+    runs: int
+    last_record_id: int
+    last_trained_at: datetime
+
+
+class ModelComparison(BaseModel):
+    """Настройки модели из истории обучений, от лучшей к худшей по выбранной метрике."""
+
+    metric: MetricName
+    best: ConfigComparison | None
+    configs: list[ConfigComparison]
 
 
 class ModelStatus(BaseModel):

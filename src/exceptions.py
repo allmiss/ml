@@ -107,3 +107,16 @@ class PredictionError(ChurnServiceError):
 
     status_code = 500
     code = "prediction_failed"
+
+
+class InvalidHistoryFileError(ChurnServiceError):
+    """Файл истории обучений повреждён.
+
+    Появляется в TrainingHistory при первом чтении истории, если файл
+    не является JSON-списком записей TrainingRecord (например, его
+    отредактировали вручную). Файл при этом не перезаписывается, чтобы
+    не потерять историю; его нужно исправить или удалить.
+    """
+
+    status_code = 500
+    code = "invalid_history_file"

@@ -1,11 +1,12 @@
 from datetime import datetime
+from enum import StrEnum
 
 import pandas as pd
 from pydantic import BaseModel, ConfigDict
 from sklearn.base import ClassifierMixin
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.pipeline import Pipeline
 
 from src.config import RANDOM_STATE
@@ -17,6 +18,10 @@ MODEL_CLASSES: dict[str, type[ClassifierMixin]] = {
     "logreg": LogisticRegression,
     "random_forest": RandomForestClassifier,
 }
+
+# Поддерживаемые типы моделей как перечисление — для параметров запросов,
+# где неизвестный тип должен сразу давать 422 со списком допустимых значений
+ModelType = StrEnum("ModelType", {name: name for name in MODEL_CLASSES})
 
 DEFAULT_HYPERPARAMETERS: dict[str, dict] = {
     "logreg": {"max_iter": 1000},
@@ -77,7 +82,9 @@ def train_churn_model(X_train: pd.DataFrame, y_train: pd.Series, config: Trainin
 
 def evaluate_model(pipeline: Pipeline, X_test: pd.DataFrame, y_test: pd.Series) -> TrainMetrics:
     y_pred = pipeline.predict(X_test)
+    churn_proba = pipeline.predict_proba(X_test)[:, list(pipeline.classes_).index(1)]
     return TrainMetrics(
         accuracy=round(accuracy_score(y_test, y_pred), 3),
         f1=round(f1_score(y_test, y_pred), 3),
+        roc_auc=round(roc_auc_score(y_test, churn_proba), 3),
     )
