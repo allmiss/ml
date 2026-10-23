@@ -1,4 +1,5 @@
 import csv
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -6,6 +7,8 @@ from pydantic import ValidationError
 
 from src.exceptions import DataPreparationError, DatasetUnavailableError
 from src.models import DatasetRowChurn
+
+logger = logging.getLogger(__name__)
 
 
 class ChurnDataset:
@@ -45,4 +48,8 @@ class ChurnDataset:
                 ) from None
         if not rows:
             raise DatasetUnavailableError("Датасет пуст", details={"file": self.path.name})
+        churned = sum(row.churn for row in rows)
+        logger.info(
+            "Датасет %s загружен: %d строк, ушедших %.1f%%", self.path.name, len(rows), 100 * churned / len(rows)
+        )
         return rows

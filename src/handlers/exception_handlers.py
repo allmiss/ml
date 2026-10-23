@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException
 from src.exceptions import ChurnServiceError
 from src.models import ErrorResponse
 
-logger = logging.getLogger("uvicorn.error")
+logger = logging.getLogger(__name__)
 
 
 def error_response(status_code: int, error: ErrorResponse, headers: dict[str, str] | None = None) -> JSONResponse:
@@ -19,13 +19,19 @@ def error_response(status_code: int, error: ErrorResponse, headers: dict[str, st
 
 
 async def handle_service_error(request: Request, exc: ChurnServiceError) -> JSONResponse:
-    if exc.status_code >= 500:
-        logger.error("%s %s -> %s: %s %s", request.method, request.url.path, exc.code, exc.message, exc.details)
+    # ERROR — только сбои сервиса (500); 4xx и 503 (нет модели или датасета) — ожидаемые ситуации
+    level = logging.ERROR if exc.status_code == 500 else logging.WARNING
+    details = f" {exc.details}" if exc.details else ""
+    logger.log(
+        level, "%s %s -> %d %s: %s%s",
+        request.method, request.url.path, exc.status_code, exc.code, exc.message, details,
+    )
     return error_response(exc.status_code, ErrorResponse(code=exc.code, message=exc.message, details=exc.details))
 
 
-async def handle_http_error(_request: Request, exc: HTTPException) -> JSONResponse:
+async def handle_http_error(request: Request, exc: HTTPException) -> JSONResponse:
     status = HTTPStatus(exc.status_code)
+    logger.warning("%s %s -> %d %s", request.method, request.url.path, exc.status_code, status.name.lower())
     if isinstance(exc.detail, str):
         message, details = exc.detail, None
     else:
@@ -45,7 +51,7 @@ def input_for_response(value: Any) -> Any:
     return type(value).__name__
 
 
-async def handle_validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
+async def handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
     errors = []
     for err in exc.errors():
         if err["type"] == "json_invalid":
@@ -57,6 +63,11 @@ async def handle_validation_error(_request: Request, exc: RequestValidationError
         if err["type"] != "missing":
             error["input"] = input_for_response(err.get("input"))
         errors.append(error)
+    # в лог — только поля и типы ошибок, без переданных значений: это могут быть данные клиентов
+    logger.warning(
+        "%s %s -> 422 validation_error: %s",
+        request.method, request.url.path, ", ".join(f"{e['field']} ({e['type']})" for e in errors),
+    )
     error = ErrorResponse(code="validation_error", message="Запрос не прошёл проверку", details={"errors": errors})
     return error_response(422, error)
 

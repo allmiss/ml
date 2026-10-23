@@ -1,13 +1,22 @@
 from collections import Counter
 
 from src.dataset import ChurnDataset
-from src.models import DatasetInfo, DatasetRowChurn, FeatureVectorChurn, SplitInfo
+from src.exceptions import ChurnServiceError
+from src.models import DatasetHealth, DatasetInfo, DatasetRowChurn, FeatureVectorChurn, SplitInfo
 from src.preprocessing import DataSplit, class_distribution, prepare_data, split_data
 
 
 class DatasetService:
     def __init__(self, dataset: ChurnDataset):
         self.dataset = dataset
+
+    def health(self) -> DatasetHealth:
+        # датасет грузится при первом обращении и дальше берётся из памяти,
+        # поэтому повторные проверки файл не перечитывают
+        try:
+            return DatasetHealth(loaded=True, rows=len(self.dataset.rows))
+        except ChurnServiceError as e:
+            return DatasetHealth(loaded=False, error=e.message)
 
     def preview(self, n: int) -> list[DatasetRowChurn]:
         return self.dataset.rows[:n]

@@ -1,4 +1,5 @@
 import logging
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from src.history import TrainingHistory, compare_configs
 from src.models import (
     FeatureInfo,
     FeatureVectorChurn,
+    ModelHealth,
     MetricName,
     ModelComparison,
     ModelMetrics,
@@ -22,7 +24,7 @@ from src.services.dataset_service import DatasetService
 from src.storage import load_churn_model, save_churn_model
 from src.training import TrainedModel, evaluate_model, resolve_config, train_churn_model
 
-logger = logging.getLogger("uvicorn.error")
+logger = logging.getLogger(__name__)
 
 
 class ModelService:
@@ -46,17 +48,25 @@ class ModelService:
         # а не после того, как новая модель уже сохранена без записи в истории
         self.history.records
 
+        # проверяем конфиг до разбиения данных: в лог об обучении попадают только
+        # поддерживаемые модели и итоговые гиперпараметры вместе со значениями по умолчанию
+        config = resolve_config(config)
         X_train, X_test, y_train, y_test = self.dataset_service.split()
+        logger.info(
+            "Обучение %s %s: train %d, test %d",
+            config.model_type, config.hyperparameters, len(X_train), len(X_test),
+        )
+        started = time.perf_counter()
         pipeline = train_churn_model(X_train, y_train, config)
         model = TrainedModel(
             pipeline=pipeline,
-            config=resolve_config(config),
+            config=config,
             trained_at=datetime.now().astimezone(),
             metrics=evaluate_model(pipeline, X_test, y_test),
         )
         save_churn_model(model, self.model_path)
         self.model = model
-        self.history.add(
+        record = self.history.add(
             trained_at=model.trained_at,
             model_type=model.config.model_type,
             hyperparameters=model.config.hyperparameters,
@@ -64,7 +74,17 @@ class ModelService:
             test_size=len(X_test),
             metrics=model.metrics,
         )
+        logger.info(
+            "Модель %s обучена за %.2f с и сохранена в %s: accuracy=%s f1=%s roc_auc=%s, запись истории #%d",
+            model.config.model_type, time.perf_counter() - started, self.model_path.name,
+            model.metrics.accuracy, model.metrics.f1, model.metrics.roc_auc, record.id,
+        )
         return model.metrics
+
+    def health(self) -> ModelHealth:
+        if self.model is None:
+            return ModelHealth(available=False)
+        return ModelHealth(available=True, model_type=self.model.config.model_type, trained_at=self.model.trained_at)
 
     def status(self) -> ModelStatus:
         if self.model is None:
@@ -105,4 +125,11 @@ class ModelService:
     def predict(self, features: list[FeatureVectorChurn]) -> PredictionResponseChurn:
         if self.model is None:
             raise ModelNotTrainedError("Модель не обучена, обучите её через POST /model/train")
-        return PredictionResponseChurn(predictions=predict_churn(self.model.pipeline, features))
+        started = time.perf_counter()
+        predictions = predict_churn(self.model.pipeline, features)
+        # значения признаков не логируем: это данные клиентов
+        logger.info(
+            "Предсказание для %d клиентов за %.1f мс: уйдут %d",
+            len(predictions), 1000 * (time.perf_counter() - started), sum(p.churn for p in predictions),
+        )
+        return PredictionResponseChurn(predictions=predictions)
