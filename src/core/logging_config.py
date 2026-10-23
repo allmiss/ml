@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from src.config import LOG_LEVEL
+from src.core.config import LOG_LEVEL
 
 LOG_FORMAT = "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
 

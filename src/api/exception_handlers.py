@@ -8,8 +8,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
-from src.exceptions import ChurnServiceError
-from src.models import ErrorResponse
+from src.core.exceptions import ChurnServiceError
+from src.schemas.errors import ErrorResponse
 
 logger = logging.getLogger(__name__)
 

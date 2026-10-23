@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from src.dataset import ChurnDataset
-from src.exceptions import DataPreparationError, DatasetUnavailableError
+from src.core.exceptions import DataPreparationError, DatasetUnavailableError
+from src.ml.dataset import ChurnDataset
 from tests.synthetic import make_row, write_csv
 
 

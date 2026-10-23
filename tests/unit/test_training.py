@@ -1,9 +1,9 @@
 import pytest
 
-from src.exceptions import InvalidTrainingConfigError
-from src.models import TrainingConfigChurn
-from src.preprocessing import DataSplit
-from src.training import evaluate_model, train_churn_model
+from src.core.exceptions import InvalidTrainingConfigError
+from src.ml.preprocessing import DataSplit
+from src.ml.training import evaluate_model, train_churn_model
+from src.schemas.model import TrainingConfigChurn
 
 LOGREG = TrainingConfigChurn(model_type="logreg")
 FOREST = TrainingConfigChurn(model_type="random_forest", hyperparameters={"n_estimators": 50, "max_depth": 6})

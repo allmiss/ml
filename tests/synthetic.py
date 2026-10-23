@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.preprocessing import FEATURES, TARGET
+from src.ml.preprocessing import FEATURES, TARGET
 
 SEED = 42
 DATASET_SIZE = 500

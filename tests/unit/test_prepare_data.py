@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from src.exceptions import DataPreparationError
-from src.preprocessing import FEATURES, TARGET, prepare_data
+from src.core.exceptions import DataPreparationError
+from src.ml.preprocessing import FEATURES, TARGET, prepare_data
 
 
 def test_drops_rows_without_target(small_frame: pd.DataFrame) -> None:

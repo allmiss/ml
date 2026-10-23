@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import src.main
-from src.routes.prediction import RISKY_CLIENT
+from src.api.routes.prediction import RISKY_CLIENT
 from tests.api.helpers import assert_error
 
 

@@ -2,9 +2,10 @@ import csv
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from fastapi.testclient import TestClient
 
-from src.models import DatasetRowChurn, FeatureVectorChurn
+from src.schemas.churn import DatasetRowChurn, FeatureVectorChurn
 from tests.api.helpers import ServiceStarter, assert_error
 
 
@@ -29,6 +30,15 @@ def test_preview_matches_csv(client: TestClient, churn_csv: Path) -> None:
 
     assert response.status_code == 200
     assert response.json() == [DatasetRowChurn(**row).model_dump() for row in first_rows]
+
+
+def test_split_info(client: TestClient, churn_frame: pd.DataFrame) -> None:
+    split = client.get("/dataset/split-info").json()
+
+    assert split["train_size"] + split["test_size"] == len(churn_frame)
+    assert split["test_size"] == round(len(churn_frame) * 0.2)
+    shares = [split["churn_distribution"][part]["shares"]["1"] for part in ("train", "test")]
+    assert shares[0] == pytest.approx(shares[1], abs=0.01)
 
 
 # --- ошибки ---

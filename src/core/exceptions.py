@@ -5,7 +5,7 @@ class ChurnServiceError(Exception):
     """Базовое исключение сервиса.
 
     Все ошибки сервиса наследуются от него. Обработчик из
-    src/handlers/exception_handlers.py превращает их в JSON-ответ
+    src/api/exception_handlers.py превращает их в JSON-ответ
     ErrorResponse {"code", "message", "details"} с HTTP-кодом из status_code.
     code — постоянный машинный код ошибки, message — текст для человека,
     details — необязательные подробности (что именно пошло не так).
@@ -75,9 +75,10 @@ class InvalidTrainingConfigError(ChurnServiceError):
 class InvalidModelFileError(ChurnServiceError):
     """Файл модели в неподдерживаемом формате.
 
-    Появляется в load_churn_model, если в файле лежит не TrainedModel,
-    например модель, сохранённая старой версией сервиса. При старте
-    приложения ошибка пишется в лог, а сервис запускается без модели.
+    Появляется в load_churn_model, если файл не читается или в нём не
+    данные TrainedModel, например модель, сохранённая старой версией
+    сервиса. При старте приложения пишется предупреждение в лог, а сервис
+    запускается без модели.
     """
 
     code = "invalid_model_file"

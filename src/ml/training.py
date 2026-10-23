@@ -9,10 +9,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.pipeline import Pipeline
 
-from src.config import RANDOM_STATE
-from src.exceptions import InvalidTrainingConfigError
-from src.models import TrainingConfigChurn, TrainMetrics
-from src.preprocessing import create_preprocessor
+from src.core.config import RANDOM_STATE
+from src.core.exceptions import InvalidTrainingConfigError
+from src.ml.preprocessing import create_preprocessor
+from src.schemas.model import TrainingConfigChurn, TrainMetrics
 
 MODEL_CLASSES: dict[str, type[ClassifierMixin]] = {
     "logreg": LogisticRegression,

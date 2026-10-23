@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import src.main
-from src.routes.prediction import LOYAL_CLIENT, RISKY_CLIENT
+from src.api.routes.prediction import LOYAL_CLIENT, RISKY_CLIENT
 
 
 def test_train_status_predict(client: TestClient) -> None:

@@ -1,9 +1,15 @@
 import pandas as pd
 import pytest
 
-from src.models import TrainingConfigChurn
-from src.preprocessing import CATEGORICAL_FEATURES, NUMERIC_FEATURES, create_preprocessor, fitted_categories, prepare_data
-from src.training import create_pipeline
+from src.ml.preprocessing import (
+    CATEGORICAL_FEATURES,
+    NUMERIC_FEATURES,
+    create_preprocessor,
+    fitted_categories,
+    prepare_data,
+)
+from src.ml.training import create_pipeline
+from src.schemas.model import TrainingConfigChurn
 
 
 def test_output_columns(small_frame: pd.DataFrame) -> None:

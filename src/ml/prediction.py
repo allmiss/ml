@@ -1,8 +1,8 @@
 from sklearn.pipeline import Pipeline
 
-from src.exceptions import FeatureMismatchError, PredictionError
-from src.models import ChurnPrediction, FeatureVectorChurn
-from src.preprocessing import features_to_frame
+from src.core.exceptions import FeatureMismatchError, PredictionError
+from src.ml.preprocessing import features_to_frame
+from src.schemas.churn import ChurnPrediction, FeatureVectorChurn
 
 
 def predict_churn(pipeline: Pipeline, features: list[FeatureVectorChurn]) -> list[ChurnPrediction]:

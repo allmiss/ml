@@ -1,9 +1,11 @@
 from collections import Counter
 
-from src.dataset import ChurnDataset
-from src.exceptions import ChurnServiceError
-from src.models import DatasetHealth, DatasetInfo, DatasetRowChurn, FeatureVectorChurn, SplitInfo
-from src.preprocessing import DataSplit, class_distribution, prepare_data, split_data
+from src.core.exceptions import ChurnServiceError
+from src.ml.dataset import ChurnDataset
+from src.ml.preprocessing import DataSplit, class_distribution, prepare_data, split_data
+from src.schemas.churn import DatasetRowChurn, FeatureVectorChurn
+from src.schemas.dataset import DatasetInfo, SplitInfo
+from src.schemas.health import DatasetHealth
 
 
 class DatasetService:

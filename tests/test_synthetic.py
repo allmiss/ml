@@ -1,7 +1,7 @@
 import pandas as pd
 
-from src.models import DatasetRowChurn
-from src.preprocessing import TARGET
+from src.ml.preprocessing import TARGET
+from src.schemas.churn import DatasetRowChurn
 from tests.synthetic import make_churn_frame
 
 

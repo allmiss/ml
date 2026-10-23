@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from src.exceptions import DataPreparationError
-from src.preprocessing import class_distribution, prepare_data, split_data
+from src.core.exceptions import DataPreparationError
+from src.ml.preprocessing import class_distribution, prepare_data, split_data
 
 
 def test_sizes_and_stratification(churn_frame: pd.DataFrame) -> None:

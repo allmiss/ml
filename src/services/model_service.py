@@ -3,26 +3,25 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from src.exceptions import ModelNotTrainedError
-from src.history import TrainingHistory, compare_configs
-from src.models import (
+from src.core.exceptions import InvalidModelFileError, ModelNotTrainedError
+from src.ml.history import TrainingHistory, compare_configs
+from src.ml.prediction import predict_churn
+from src.ml.preprocessing import FEATURES, NUMERIC_FEATURES, TARGET, fitted_categories
+from src.ml.storage import load_churn_model, save_churn_model
+from src.ml.training import TrainedModel, evaluate_model, resolve_config, train_churn_model
+from src.schemas.churn import FeatureVectorChurn, PredictionResponseChurn
+from src.schemas.health import ModelHealth
+from src.schemas.model import (
     FeatureInfo,
-    FeatureVectorChurn,
-    ModelHealth,
     MetricName,
     ModelComparison,
     ModelMetrics,
     ModelSchema,
     ModelStatus,
-    PredictionResponseChurn,
     TrainingConfigChurn,
     TrainMetrics,
 )
-from src.prediction import predict_churn
-from src.preprocessing import FEATURES, NUMERIC_FEATURES, TARGET, fitted_categories
 from src.services.dataset_service import DatasetService
-from src.storage import load_churn_model, save_churn_model
-from src.training import TrainedModel, evaluate_model, resolve_config, train_churn_model
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +39,8 @@ class ModelService:
             logger.info("Модель загружена из %s", self.model_path)
         except FileNotFoundError:
             logger.info("Сохранённой модели нет, обучите её через POST /model/train")
+        except InvalidModelFileError as e:
+            logger.warning(e.message)
         except Exception:
             logger.exception("Не удалось загрузить модель из %s", self.model_path)
 

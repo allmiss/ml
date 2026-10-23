@@ -2,10 +2,18 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from src.dependencies import ModelServiceDep
-from src.models import MetricName, ModelComparison, ModelMetrics, ModelSchema, ModelStatus, TrainingConfigChurn, TrainMetrics
-from src.routes.error_examples import TRAIN_ERRORS
-from src.training import ModelType
+from src.api.dependencies import ModelServiceDep
+from src.api.routes.error_examples import TRAIN_ERRORS
+from src.ml.training import ModelType
+from src.schemas.model import (
+    MetricName,
+    ModelComparison,
+    ModelMetrics,
+    ModelSchema,
+    ModelStatus,
+    TrainingConfigChurn,
+    TrainMetrics,
+)
 
 router = APIRouter(prefix="/model", tags=["model"])
 

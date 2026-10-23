@@ -3,9 +3,9 @@ from sklearn.base import ClassifierMixin
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
-from src.exceptions import InvalidTrainingConfigError
-from src.models import TrainingConfigChurn
-from src.training import DEFAULT_HYPERPARAMETERS, create_model, create_pipeline, resolve_config
+from src.core.exceptions import InvalidTrainingConfigError
+from src.ml.training import DEFAULT_HYPERPARAMETERS, create_model, create_pipeline, resolve_config
+from src.schemas.model import TrainingConfigChurn
 
 LOGREG = TrainingConfigChurn(model_type="logreg")
 FOREST = TrainingConfigChurn(model_type="random_forest", hyperparameters={"n_estimators": 50, "max_depth": 6})

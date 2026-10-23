@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.preprocessing import DataSplit, prepare_data, split_data
+from src.ml.preprocessing import DataSplit, prepare_data, split_data
 from tests.synthetic import make_churn_frame, make_row
 
 

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Query
 
-from src.dependencies import DatasetServiceDep
-from src.models import DatasetInfo, DatasetRowChurn, SplitInfo
+from src.api.dependencies import DatasetServiceDep
+from src.schemas.churn import DatasetRowChurn
+from src.schemas.dataset import DatasetInfo, SplitInfo
 
 router = APIRouter(prefix="/dataset", tags=["dataset"])
 

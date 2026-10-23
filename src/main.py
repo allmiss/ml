@@ -2,12 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from src.config import DATASET_PATH, HISTORY_PATH, MODEL_PATH
-from src.dataset import ChurnDataset
-from src.handlers.exception_handlers import register_exception_handlers
-from src.history import TrainingHistory
-from src.logging_config import setup_logging
-from src.routes import dataset, health, model, prediction, root
+from src.api.exception_handlers import register_exception_handlers
+from src.api.routes import dataset, health, model, prediction, root
+from src.core.config import DATASET_PATH, HISTORY_PATH, MODEL_PATH
+from src.core.logging_config import setup_logging
+from src.ml.dataset import ChurnDataset
+from src.ml.history import TrainingHistory
 from src.services.dataset_service import DatasetService
 from src.services.model_service import ModelService
 

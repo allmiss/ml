@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body
 
-from src.dependencies import ModelServiceDep
-from src.models import FeatureVectorsChurn, PredictionResponseChurn
-from src.routes.error_examples import PREDICT_ERRORS
+from src.api.dependencies import ModelServiceDep
+from src.api.routes.error_examples import PREDICT_ERRORS
+from src.schemas.churn import FeatureVectorsChurn, PredictionResponseChurn
 
 router = APIRouter(tags=["prediction"])
 

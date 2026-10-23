@@ -7,7 +7,7 @@
 
 from typing import Any
 
-from src.models import ErrorResponse
+from src.schemas.errors import ErrorResponse
 
 
 def error_doc(description: str, examples: dict[str, tuple[str, dict[str, Any]]]) -> dict[str, Any]:

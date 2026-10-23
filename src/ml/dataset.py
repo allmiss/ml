@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 from pydantic import ValidationError
 
-from src.exceptions import DataPreparationError, DatasetUnavailableError
-from src.models import DatasetRowChurn
+from src.core.exceptions import DataPreparationError, DatasetUnavailableError
+from src.schemas.churn import DatasetRowChurn
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,9 @@ class ChurnDataset:
                     details={
                         "file": self.path.name,
                         "line": reader.line_num,
-                        "errors": [{"field": ".".join(map(str, err["loc"])), "message": err["msg"]} for err in e.errors()],
+                        "errors": [
+                            {"field": ".".join(map(str, err["loc"])), "message": err["msg"]} for err in e.errors()
+                        ],
                     },
                 ) from None
         if not rows:

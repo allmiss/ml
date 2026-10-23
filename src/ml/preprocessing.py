@@ -4,9 +4,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from src.config import RANDOM_STATE, TEST_SIZE
-from src.exceptions import DataPreparationError
-from src.models import ClassDistribution, FeatureVectorChurn
+from src.core.config import RANDOM_STATE, TEST_SIZE
+from src.core.exceptions import DataPreparationError
+from src.schemas.churn import FeatureVectorChurn
+from src.schemas.dataset import ClassDistribution
 
 TARGET = "churn"
 
@@ -90,8 +91,7 @@ def create_preprocessor() -> ColumnTransformer:
 
 
 def fitted_categories(pipeline: Pipeline) -> dict[str, list[str]]:
-    categorical = pipeline.named_steps["preprocessor"].named_transformers_["cat"]
-    encoder = categorical[-1] if isinstance(categorical, Pipeline) else categorical
+    encoder = pipeline.named_steps["preprocessor"].named_transformers_["cat"].named_steps["encoder"]
     return {
         name: [str(value) for value in values]
         for name, values in zip(encoder.feature_names_in_, encoder.categories_)

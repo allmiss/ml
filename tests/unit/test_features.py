@@ -1,5 +1,5 @@
-from src.models import FeatureVectorChurn
-from src.preprocessing import CATEGORICAL_FEATURES, FEATURES, NUMERIC_FEATURES, TARGET, features_to_frame
+from src.ml.preprocessing import CATEGORICAL_FEATURES, FEATURES, NUMERIC_FEATURES, TARGET, features_to_frame
+from src.schemas.churn import FeatureVectorChurn
 from tests.synthetic import make_row
 
 

@@ -5,8 +5,8 @@ from typing import Any
 
 from pydantic import TypeAdapter, ValidationError
 
-from src.exceptions import InvalidHistoryFileError
-from src.models import ConfigComparison, MetricName, TrainingRecord, TrainMetrics
+from src.core.exceptions import InvalidHistoryFileError
+from src.schemas.model import ConfigComparison, MetricName, TrainingRecord, TrainMetrics
 
 RECORDS = TypeAdapter(list[TrainingRecord])
 
@@ -78,8 +78,7 @@ class TrainingHistory:
 def compare_configs(records: list[TrainingRecord], metric: MetricName) -> list[ConfigComparison]:
     """Сводит записи истории по настройкам (тип модели + гиперпараметры) и сортирует
     их по метрике, лучшие первыми. Повторные обучения с той же настройкой не
-    дублируются: берутся метрики последнего из них, а в runs — сколько их было.
-    Настройки без значения метрики (roc_auc у старых записей) идут в конце."""
+    дублируются: берутся метрики последнего из них, а в runs — сколько их было."""
     configs: dict[str, ConfigComparison] = {}
     for record in records:
         key = json.dumps([record.model_type, record.hyperparameters], sort_keys=True, default=str)
@@ -93,8 +92,4 @@ def compare_configs(records: list[TrainingRecord], metric: MetricName) -> list[C
             last_trained_at=record.trained_at,
         )
 
-    def sort_key(config: ConfigComparison) -> tuple[bool, float]:
-        value = getattr(config.metrics, metric)
-        return value is None, -(value or 0)
-
-    return sorted(configs.values(), key=sort_key)
+    return sorted(configs.values(), key=lambda config: getattr(config.metrics, metric), reverse=True)

@@ -9,10 +9,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 
 import src.main
-from src.models import TrainingConfigChurn
-from src.preprocessing import DataSplit, create_preprocessor
-from src.routes.prediction import LOYAL_CLIENT, RISKY_CLIENT
-from src.training import create_pipeline
+from src.api.routes.prediction import LOYAL_CLIENT, RISKY_CLIENT
+from src.ml.preprocessing import DataSplit, create_preprocessor
+from src.ml.training import create_pipeline
+from src.schemas.model import TrainingConfigChurn
 from tests.api.helpers import assert_error
 
 JSON_HEADERS = {"Content-Type": "application/json"}
@@ -22,6 +22,12 @@ def test_single_client_same_as_in_batch(trained_client: TestClient) -> None:
     single = trained_client.post("/predict", json=LOYAL_CLIENT).json()["predictions"]
     batch = trained_client.post("/predict", json=[RISKY_CLIENT, LOYAL_CLIENT]).json()["predictions"]
     assert single == [batch[1]]
+
+
+def test_empty_list(trained_client: TestClient) -> None:
+    response = trained_client.post("/predict", json=[])
+    assert response.status_code == 200
+    assert response.json() == {"predictions": []}
 
 
 # --- нет модели ---

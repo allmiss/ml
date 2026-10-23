@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from src.dependencies import DatasetServiceDep, ModelServiceDep
-from src.models import HealthStatus
+from src.api.dependencies import DatasetServiceDep, ModelServiceDep
+from src.schemas.health import HealthStatus
 
 router = APIRouter(tags=["health"])
 
