@@ -1,10 +1,8 @@
 from collections import Counter
 
-import pandas as pd
-
 from src.dataset import ChurnDataset
 from src.models import DatasetInfo, DatasetRowChurn, FeatureVectorChurn, SplitInfo
-from src.preprocessing import class_distribution, prepare_data, split_data
+from src.preprocessing import DataSplit, class_distribution, prepare_data, split_data
 
 
 class DatasetService:
@@ -23,7 +21,7 @@ class DatasetService:
             churn_distribution=dict(sorted(Counter(row.churn for row in rows).items())),
         )
 
-    def split(self) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    def split(self) -> DataSplit:
         return split_data(*prepare_data(self.dataset.to_frame()))
 
     def split_info(self) -> SplitInfo:

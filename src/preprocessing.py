@@ -27,6 +27,9 @@ CATEGORICAL_FEATURES = [
 
 FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 
+# X_train, X_test, y_train, y_test
+DataSplit = tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]
+
 
 def features_to_frame(features: list[FeatureVectorChurn]) -> pd.DataFrame:
     return pd.DataFrame([item.model_dump() for item in features], columns=FEATURES)
@@ -50,7 +53,7 @@ def prepare_data(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 
 def split_data(
     X: pd.DataFrame, y: pd.Series, test_size: float = TEST_SIZE, random_state: int = RANDOM_STATE
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+) -> DataSplit:
     try:
         return train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
     except ValueError as e:
